@@ -139,6 +139,7 @@ button:focus-visible, select:focus-visible, a:focus-visible { outline: 3px solid
   background: var(--panel); border: 2px solid var(--line); border-radius: var(--radius);
   padding: 14px; color: var(--ink); cursor: pointer; font-size: 14px; line-height: 1.6; box-shadow: var(--shadow);
 }
+a.set { color: var(--ink); font-weight: 400; text-decoration: none; }
 .set .icon { font-size: 28px; line-height: 1; flex: none; }
 .set b { display: block; font-size: 16px; margin-bottom: 2px; }
 .bubble .row .ghost { min-height: 44px; padding: 8px 12px; font-size: 14px; white-space: nowrap; }
