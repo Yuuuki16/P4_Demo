@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react'
 import { submitResponse } from './api'
 import { ResultStep } from './components/ResultStep'
+import { Consent } from './components/Consent'
 import { StatsPage } from './components/StatsPage'
 import { Survey, isComplete } from './components/Survey'
 import { TestStep } from './components/TestStep'
 import { TrainStep } from './components/TrainStep'
 import { DATASETS, initialCustomResumes } from './data/datasets'
 import { train } from './lib/classifier'
-import { hasAnswered, markAnswered, respondentId } from './lib/respondent'
+import { hasAnswered, hasConsented, markAnswered, markConsented, respondentId } from './lib/respondent'
 import { HowItWorks } from './components/HowItWorks'
 import type { Answers, DatasetId, Model, Resume } from './lib/types'
 import { jp } from './lib/jp'
@@ -63,6 +64,8 @@ function Experience() {
   const [replaying, setReplaying] = useState(false)
   // 最初の画面で「はじめて」を選んだか（選ぶまではアンケートを出さず、入口を2つ見せる）
   const [firstTime, setFirstTime] = useState(false)
+  // アンケート前の説明に同意したか（1ブラウザ1回。同意済みなら説明は出さない）
+  const [consented, setConsented] = useState(hasConsented)
   const surveyDone = answeredBefore || replaying
 
   const reachable = [true, surveyDone || isComplete(pre), model !== null, model !== null]
@@ -202,7 +205,19 @@ function Experience() {
         </section>
       )}
 
-      {step === 0 && !surveyDone && firstTime && (
+      {step === 0 && !surveyDone && firstTime && !consented && (
+        <Consent
+          onAgree={() => {
+            markConsented()
+            setConsented(true)
+            scrollTo({ top: 0 })
+          }}
+          onDecline={replay}
+          onBack={() => setFirstTime(false)}
+        />
+      )}
+
+      {step === 0 && !surveyDone && firstTime && consented && (
         <section>
           <div className="hero">
             <div className="icon" aria-hidden="true">✨</div>
