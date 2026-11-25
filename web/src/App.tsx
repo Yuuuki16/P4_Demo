@@ -202,6 +202,13 @@ function Experience() {
                 <span className="mute">別のスマホで回答した人もこちらへ。アンケートなしで、AIのデモを何度でも試せます。</span>
               </span>
             </button>
+            <a data-jp className="set" href="#stats">
+              <span className="icon" aria-hidden="true">📊</span>
+              <span>
+                <b>結果だけ見る</b>
+                <span className="mute">体験はせずに、これまでに集まったみんなの回答の分析を見ます。</span>
+              </span>
+            </a>
           </div>
           <p className="small">回答は匿名で集計し、授業の発表に使います。回答は1人1回までにしてください。</p>
         </section>
