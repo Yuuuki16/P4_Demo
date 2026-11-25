@@ -6,7 +6,7 @@ const [MEN, WOMEN] = TEST_RESUMES
 
 describe('tokenize', () => {
   it('漢字・カタカナ・英字のまとまりを単語にし、ひらがなと記号は捨てる', () => {
-    expect(tokenize(MEN)).toEqual(['男子', 'サッカー', '部', '所属', '海外留学', '英語', '勉強'])
+    expect(tokenize(MEN)).toEqual(['男子', 'サッカー', '部', '所属', '学園祭', 'カフェ', '出店', '売上', 'トップ'])
   })
 
   it('同じ単語は1回だけ数える', () => {
@@ -31,7 +31,7 @@ describe('train', () => {
   })
 
   it('採用と不採用が同じ数なら prior は 0', () => {
-    const model = train(DATASETS.A.resumes) // 5件と5件
+    const model = train(DATASETS.A.resumes) // 8件と8件
     expect(model.prior).toBeCloseTo(0, 6)
   })
 })
