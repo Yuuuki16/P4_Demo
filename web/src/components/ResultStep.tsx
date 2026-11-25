@@ -23,6 +23,13 @@ export function ResultStep({ pre, post, save }: { pre: Answers; post: Answers; s
         {save === 'saved' && '回答を匿名で保存しました。ご協力ありがとうございました。'}
         {save === 'error' && '回答を保存できませんでした（サーバーに接続できません）。'}
       </p>
+      {save !== 'saving' && (
+        <p className="row">
+          <a className="go" href="#stats">
+            みんなの回答（集計）を見る →
+          </a>
+        </p>
+      )}
     </div>
   )
 }
