@@ -46,6 +46,25 @@ func testStore(t *testing.T, newStore func(t *testing.T) Store) {
 			t.Errorf("got[1] = %+v", got[1])
 		}
 	})
+
+	t.Run("同じidは二重に保存しない", func(t *testing.T) {
+		s := newStore(t)
+		r := Response{ID: "dup", Pre: Answers{1, 1, 1}, Post: Answers{1, 1, 1}, CreatedAt: time.Now()}
+		r2 := r
+		r2.Pre = Answers{5, 5, 5} // 2回目は内容が違っても無視される
+		for _, x := range []Response{r, r2} {
+			if err := s.Add(x); err != nil {
+				t.Fatal(err)
+			}
+		}
+		all, err := s.All()
+		if err != nil {
+			t.Fatal(err)
+		}
+		if len(all) != 1 || all[0].Pre != r.Pre {
+			t.Errorf("All() = %+v, want only the first response", all)
+		}
+	})
 }
 
 func TestFileStore(t *testing.T) {
@@ -87,21 +106,4 @@ func TestPostgresStore(t *testing.T) {
 		}
 	})
 
-	t.Run("同じidは二重に保存しない", func(t *testing.T) {
-		s, err := NewPostgresStore(context.Background(), url)
-		if err != nil {
-			t.Fatal(err)
-		}
-		defer s.Close()
-		s.pool.Exec(context.Background(), "TRUNCATE responses")
-		r := Response{ID: "dup", Pre: Answers{1, 1, 1}, Post: Answers{1, 1, 1}, CreatedAt: time.Now()}
-		for range 2 {
-			if err := s.Add(r); err != nil {
-				t.Fatal(err)
-			}
-		}
-		if all, _ := s.All(); len(all) != 1 {
-			t.Errorf("len = %d, want 1", len(all))
-		}
-	})
 }

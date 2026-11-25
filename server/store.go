@@ -34,6 +34,7 @@ type Store interface {
 }
 
 // FileStore は回答を JSON Lines（1行に1件のJSON）でファイルに追記する。
+// 同じ id の回答がすでにあれば保存しない（1ブラウザ1回にするため。PostgresStore と同じ動き）。
 type FileStore struct {
 	mu   sync.Mutex
 	path string
@@ -47,6 +48,16 @@ func (s *FileStore) Add(r Response) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
+	existing, err := s.readAll()
+	if err != nil {
+		return err
+	}
+	for _, e := range existing {
+		if e.ID == r.ID {
+			return nil
+		}
+	}
+
 	f, err := os.OpenFile(s.path, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0o644)
 	if err != nil {
 		return err
@@ -58,6 +69,11 @@ func (s *FileStore) Add(r Response) error {
 func (s *FileStore) All() ([]Response, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
+	return s.readAll()
+}
+
+// readAll はファイルの全件を読む。呼び出す側で s.mu をロックしておくこと。
+func (s *FileStore) readAll() ([]Response, error) {
 
 	f, err := os.Open(s.path)
 	if errors.Is(err, fs.ErrNotExist) {
