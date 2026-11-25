@@ -1,5 +1,6 @@
 import { QUESTIONS } from '../data/questions'
 import type { Answers, QuestionId } from '../lib/types'
+import { jp } from '../lib/jp'
 
 type Props = {
   answers: Partial<Answers>
@@ -7,7 +8,7 @@ type Props = {
 }
 
 export function Survey({ answers, onChange }: Props) {
-  return (
+  return jp(
     <div>
       {QUESTIONS.map((q) => (
         <fieldset className="q" key={q.id}>

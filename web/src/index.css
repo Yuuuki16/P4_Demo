@@ -28,7 +28,12 @@ body {
   font: 16px/1.75 'M PLUS Rounded 1c', 'Hiragino Maru Gothic ProN', system-ui, sans-serif;
   overflow-x: clip;
   -webkit-tap-highlight-color: transparent;
+  /* 日本語を単語の途中で改行しない。改行してよい位置には src/lib/jp.tsx が <wbr> を入れる */
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+  line-break: strict;
 }
+p, li { text-wrap: pretty; }
 a { color: var(--accent); font-weight: 700; }
 button { font-family: inherit; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
 
@@ -157,6 +162,7 @@ button:focus-visible, textarea:focus-visible, a:focus-visible { outline: 3px sol
 
 /* ===== 判定 ===== */
 textarea {
+  word-break: normal; /* 入力欄の中には <wbr> を入れられないので、ブラウザ標準の改行にする */
   width: 100%; min-height: 84px; background: var(--soft); color: var(--ink);
   border: 2px solid var(--line); border-radius: 14px; padding: 10px 12px;
   font-size: 16px; line-height: 1.6; font-family: inherit; resize: vertical;

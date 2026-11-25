@@ -1,5 +1,6 @@
 import { CUSTOM, DATASETS } from '../data/datasets'
 import type { DatasetId, Model, Resume } from '../lib/types'
+import { jp } from '../lib/jp'
 
 type Props = {
   selected: DatasetId
@@ -31,23 +32,24 @@ export function TrainStep(props: Props) {
   const hired = resumes.filter((r) => r.hired).length
   const trained = model !== null && trainedOn === selected
 
-  return (
+  return jp(
     <section>
       <div className="hero">
         <div className="icon" aria-hidden="true">🌱</div>
         <h2>採用AIを育てよう</h2>
         <p className="lead">
-          このAIは履歴書を読んで「採用」か「不採用」かを決めます。最初は何も知らず、学べるのは
+          このAIは履歴書を読んで、採用するかどうかを決めます。はじめは何も知らず、手がかりにできるのは
           <b>過去に人間が下した判断</b>だけです。
         </p>
       </div>
 
-      <h3>どのデータで育てる？</h3>
+      <h3>どのデータで育てますか</h3>
       <div className="sets">
         {CHOICES.map((d) => (
           <button
             key={d.id}
             type="button"
+            data-jp
             className={`set ${selected === d.id ? 'on' : ''}`}
             aria-pressed={selected === d.id}
             onClick={() => onSelect(d.id)}
@@ -69,7 +71,7 @@ export function TrainStep(props: Props) {
         <div className="bubble">
           <p>
             <span className="emoji" aria-hidden="true">🧑‍💼</span>
-            あなたが人事担当者です！ 右の<b>採用／不採用</b>をタップすると切り替わります。
+            人事担当者になったつもりで判断してください。右側のボタンをタップすると、採用と不採用が切り替わります。
           </p>
           <div className="row">
             <button className="ghost" type="button" onClick={() => onCopyFrom('A')}>
@@ -114,7 +116,7 @@ export function TrainStep(props: Props) {
           <>
             <div className="status pop" role="status">
               <span className="emoji" aria-hidden="true">🎉</span>
-              データ{trainedOn}（{trainedCount}件）で学習できました！ AIが覚えたのは
+              データ{trainedOn}の{trainedCount}件で学習しました。AIが覚えたのは、単語ごとの
               <b>{Object.keys(model.weights).length}個の数字</b>だけです。
             </div>
             <button className="go block" type="button" onClick={onNext}>
