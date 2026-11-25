@@ -18,21 +18,31 @@ type Props = {
   onNext: () => void
 }
 
-const CHOICES = [DATASETS.A, DATASETS.B, CUSTOM]
+const CHOICES = [
+  { ...DATASETS.A, icon: '🏢' },
+  { ...DATASETS.B, icon: '⚖️' },
+  { ...CUSTOM, icon: '✍️' },
+]
 
 export function TrainStep(props: Props) {
   const { selected, onSelect, resumes, onToggle, onCopyFrom, model, trainedOn, trainedCount, error, onTrain, onNext } =
     props
   const custom = selected === 'C'
   const hired = resumes.filter((r) => r.hired).length
+  const trained = model !== null && trainedOn === selected
 
   return (
     <section>
-      <h2>採用AIを育てる</h2>
-      <p>
-        このAIは短い履歴書を読んで<b>採用</b>か<b>不採用</b>かを決めます。最初は何も知りません。
-        学べるのは、過去に人間が下した判断だけです。AIに学ばせるデータを選んでください。
-      </p>
+      <div className="hero">
+        <div className="icon" aria-hidden="true">🌱</div>
+        <h2>採用AIを育てよう</h2>
+        <p className="lead">
+          このAIは履歴書を読んで「採用」か「不採用」かを決めます。最初は何も知らず、学べるのは
+          <b>過去に人間が下した判断</b>だけです。
+        </p>
+      </div>
+
+      <h3>どのデータで育てる？</h3>
       <div className="sets">
         {CHOICES.map((d) => (
           <button
@@ -42,71 +52,81 @@ export function TrainStep(props: Props) {
             aria-pressed={selected === d.id}
             onClick={() => onSelect(d.id)}
           >
-            <b>
-              データ{d.id}：{d.name}
-            </b>
-            <span className="mute">{d.note}</span>
+            <span className="icon" aria-hidden="true">
+              {d.icon}
+            </span>
+            <span>
+              <b>
+                データ{d.id}：{d.name}
+              </b>
+              <span className="mute">{d.note}</span>
+            </span>
           </button>
         ))}
       </div>
 
       {custom && (
-        <div className="status">
+        <div className="bubble">
           <p>
-            右の<b>採用／不採用</b>を押すと切り替わります。あなたが人事担当者になったつもりで、16件を判断してください。
+            <span className="emoji" aria-hidden="true">🧑‍💼</span>
+            あなたが人事担当者です！ 右の<b>採用／不採用</b>をタップすると切り替わります。
           </p>
           <div className="row">
             <button className="ghost" type="button" onClick={() => onCopyFrom('A')}>
-              Aと同じ判断にする
+              Aの判断にそろえる
             </button>
             <button className="ghost" type="button" onClick={() => onCopyFrom('B')}>
-              Bと同じ判断にする
+              Bの判断にそろえる
             </button>
           </div>
         </div>
       )}
 
-      <p className="small">
-        採用 {hired}件 ／ 不採用 {resumes.length - hired}件
-      </p>
-      <table>
-        <tbody>
-          {resumes.map((r, i) => (
-            <tr key={i}>
-              <td>{r.text}</td>
-              <td>
-                {custom ? (
-                  <button
-                    type="button"
-                    className={`tag toggle ${r.hired ? 'yes' : 'no'}`}
-                    aria-label={`${r.text}：いまは${r.hired ? '採用' : '不採用'}。押すと切り替わります`}
-                    onClick={() => onToggle(i)}
-                  >
-                    {r.hired ? '採用' : '不採用'}
-                  </button>
-                ) : (
-                  <span className={`tag ${r.hired ? 'yes' : 'no'}`}>{r.hired ? '採用' : '不採用'}</span>
-                )}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      <div className="row">
-        <button className="go" type="button" onClick={onTrain}>
-          AIに学習させる
-        </button>
+      <h3>AIが読む履歴書（{resumes.length}件）</h3>
+      <div className="counts" aria-live="polite">
+        <span className="yes">採用 {hired}件</span>
+        <span className="no">不採用 {resumes.length - hired}件</span>
       </div>
+      <ul className="resumes">
+        {resumes.map((r, i) => (
+          <li className="resume" key={i}>
+            <span>{r.text}</span>
+            {custom ? (
+              <button
+                type="button"
+                className={`tag toggle ${r.hired ? 'yes' : 'no'}`}
+                aria-label={`${r.text}：いまは${r.hired ? '採用' : '不採用'}。タップで切り替え`}
+                onClick={() => onToggle(i)}
+              >
+                {r.hired ? '採用' : '不採用'}
+              </button>
+            ) : (
+              <span className={`tag ${r.hired ? 'yes' : 'no'}`}>{r.hired ? '採用' : '不採用'}</span>
+            )}
+          </li>
+        ))}
+      </ul>
+
       {error && <div className="status error">{error}</div>}
-      {model && trainedOn && (
-        <div className="status">
-          データ{trainedOn}（履歴書{trainedCount}件）で学習しました。AIが覚えたのは
-          <b>{Object.keys(model.weights).length}個の数字</b>、つまり単語ごとの重みだけです。
-          <button className="go inline" type="button" onClick={onNext}>
-            試してみる →
+
+      <div className="cta">
+        {trained ? (
+          <>
+            <div className="status pop" role="status">
+              <span className="emoji" aria-hidden="true">🎉</span>
+              データ{trainedOn}（{trainedCount}件）で学習できました！ AIが覚えたのは
+              <b>{Object.keys(model.weights).length}個の数字</b>だけです。
+            </div>
+            <button className="go block" type="button" onClick={onNext}>
+              AIに判定させてみる →
+            </button>
+          </>
+        ) : (
+          <button className="go block" type="button" onClick={onTrain}>
+            データ{selected}でAIに学習させる 🧠
           </button>
-        </div>
-      )}
+        )}
+      </div>
     </section>
   )
 }

@@ -18,8 +18,8 @@ import { isWord, splitPieces } from './text'
  * - 英字は小文字にそろえる（"Python" と "python" を同じ単語として扱うため）
  * - 同じ単語は1回だけにする（ヒント：Set）
  *
- * 例: tokenize("男子チェス部に所属。Pythonで開発。")
- *     → ["男子", "チェス", "部", "所属", "python", "開発"]
+ * 例: tokenize("男子サッカー部に所属。Pythonで開発。")
+ *     → ["男子", "サッカー", "部", "所属", "python", "開発"]
  */
 export function tokenize(text: string): string[] {
   const words = splitPieces(text)
