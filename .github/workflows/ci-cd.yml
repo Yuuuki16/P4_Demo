@@ -1,0 +1,106 @@
+# develop へのPRとpushでテストとビルドを行い、
+# develop へのpush（＝PRのマージ）でテストが全部通ったときだけ Render にデプロイする。
+#
+# 準備（1回だけ）：
+#   1. Render のサービス → Settings → Deploy Hook の URL をコピー
+#   2. GitHub のリポジトリ → Settings → Secrets and variables → Actions に
+#      RENDER_DEPLOY_HOOK_URL という名前で登録
+#   3. Render の Settings → Auto-Deploy を Off にする（二重デプロイを防ぐ）
+name: CI/CD
+
+on:
+  pull_request:
+    branches: [develop]
+  push:
+    branches: [develop]
+
+# 同じブランチで新しい実行が始まったら、古いものは止める
+concurrency:
+  group: ci-cd-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  server:
+    name: Server (Go)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: blackbox_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    defaults:
+      run:
+        working-directory: server
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: server/go.mod
+          cache-dependency-path: server/go.sum
+      - run: go vet ./...
+      - run: go test -count=1 ./...
+        env:
+          TEST_DATABASE_URL: postgres://postgres:postgres@localhost:5432/blackbox_test?sslmode=disable
+
+  web:
+    name: Web (Node)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+
+  docker:
+    name: Docker build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -t blackbox:ci .
+
+  deploy:
+    name: Deploy to Render
+    needs: [server, web, docker]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Trigger Render deploy
+        env:
+          HOOK: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+        run: |
+          if [ -z "$HOOK" ]; then
+            echo "::error::Secret RENDER_DEPLOY_HOOK_URL が未設定です（ワークフロー先頭のコメント参照）"
+            exit 1
+          fi
+          curl -fsS -X POST "$HOOK" > /dev/null
+          echo "Render にデプロイを依頼しました"
+      - name: Check the service is up
+        run: |
+          # デプロイを待ってから /api/health が ok を返すか確かめる（新旧どちらの版かまでは見ない）
+          sleep 60
+          for i in $(seq 1 54); do
+            if curl -fsS https://p4-demo.onrender.com/api/health | grep -q '"ok"'; then
+              echo "healthy"; exit 0
+            fi
+            sleep 10
+          done
+          echo "::error::/api/health が応答しません"; exit 1
