@@ -57,9 +57,3 @@ export const CUSTOM = {
 
 /** 「自分で決める」の最初の状態（データAと同じ判断から始める） */
 export const initialCustomResumes = (): Resume[] => DATASETS.A.resumes.map((r) => ({ ...r }))
-
-/** 1語だけ違う、判定用の履歴書 */
-export const TEST_RESUMES = [
-  '男子サッカー部に所属。学園祭でカフェを出店し、売上トップ。',
-  '女子サッカー部に所属。学園祭でカフェを出店し、売上トップ。',
-] as const
