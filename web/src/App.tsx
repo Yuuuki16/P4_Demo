@@ -7,6 +7,8 @@ import { TestStep } from './components/TestStep'
 import { TrainStep } from './components/TrainStep'
 import { DATASETS, initialCustomResumes } from './data/datasets'
 import { train } from './lib/classifier'
+import { hasAnswered, markAnswered, respondentId } from './lib/respondent'
+import { HowItWorks } from './components/HowItWorks'
 import type { Answers, DatasetId, Model, Resume } from './lib/types'
 
 const STEPS = ['はじめに', 'AIを育てる', '中をのぞく', 'ふりかえり'] as const
@@ -55,8 +57,22 @@ function Experience() {
   const [trainError, setTrainError] = useState<string | null>(null)
   const [finished, setFinished] = useState(false)
   const [save, setSave] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
+  // アンケートは1ブラウザ1回。回答済みなら、アンケートを出さずにAIのデモだけ遊べる
+  const [answeredBefore] = useState(hasAnswered)
+  const [replaying, setReplaying] = useState(false)
+  const surveyDone = answeredBefore || replaying
 
-  const reachable = [true, isComplete(pre), model !== null, model !== null]
+  const reachable = [true, surveyDone || isComplete(pre), model !== null, model !== null]
+
+  // もう一度AIで遊ぶ：アンケートの回答はそのままに、学習からやり直す
+  const replay = () => {
+    setReplaying(true)
+    setModel(null)
+    setTrainedOn(null)
+    setTrainError(null)
+    setSelected('A')
+    go(1)
+  }
 
   const go = (n: number) => {
     setStep(n)
@@ -98,7 +114,8 @@ function Experience() {
     setFinished(true)
     setSave('saving')
     try {
-      await submitResponse({ id: crypto.randomUUID(), dataset: trainedOn, pre, post })
+      await submitResponse({ id: respondentId(), dataset: trainedOn, pre, post })
+      markAnswered()
       setSave('saved')
     } catch {
       setSave('error')
@@ -128,7 +145,31 @@ function Experience() {
       </header>
 
       <main>
-      {step === 0 && (
+      {step === 0 && surveyDone && (
+        <section>
+          <div className="hero">
+            <div className="icon" aria-hidden="true">🙌</div>
+            <h2>アンケートは回答済みです</h2>
+            <p className="lead">ご協力ありがとうございました！ アンケートは1人1回ですが、AIのデモは何回でも遊べます。</p>
+          </div>
+          <div className="bubble">
+            <p>
+              <span className="emoji" aria-hidden="true">💡</span>
+              こんどは別のデータや、「自分で決める」でAIを育ててみよう。
+            </p>
+          </div>
+          <div className="cta">
+            <button className="go block" type="button" onClick={replay}>
+              AIを育てて遊ぶ 🌱
+            </button>
+            <a className="ghost block" href="#stats">
+              みんなの回答を見る 📊
+            </a>
+          </div>
+        </section>
+      )}
+
+      {step === 0 && !surveyDone && (
         <section>
           <div className="hero">
             <div className="icon" aria-hidden="true">🤖</div>
@@ -187,7 +228,21 @@ function Experience() {
         />
       )}
 
-      {step === 3 && (
+      {step === 3 && surveyDone && (
+        <section>
+          <HowItWorks />
+          <div className="cta">
+            <button className="go block" type="button" onClick={replay}>
+              もう一度AIで遊ぶ 🔁
+            </button>
+            <a className="ghost block" href="#stats">
+              みんなの回答を見る 📊
+            </a>
+          </div>
+        </section>
+      )}
+
+      {step === 3 && !surveyDone && (
         <section>
           <div className="hero">
             <div className="icon" aria-hidden="true">💭</div>
@@ -206,7 +261,7 @@ function Experience() {
               </button>
             </div>
           )}
-          {finished && isComplete(pre) && isComplete(post) && <ResultStep pre={pre} post={post} save={save} />}
+          {finished && isComplete(pre) && isComplete(post) && <ResultStep pre={pre} post={post} save={save} onReplay={replay} />}
         </section>
       )}
       </main>

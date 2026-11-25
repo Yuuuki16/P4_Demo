@@ -4,7 +4,9 @@ import { HowItWorks } from './HowItWorks'
 
 type SaveState = 'idle' | 'saving' | 'saved' | 'error'
 
-export function ResultStep({ pre, post, save }: { pre: Answers; post: Answers; save: SaveState }) {
+type Props = { pre: Answers; post: Answers; save: SaveState; onReplay: () => void }
+
+export function ResultStep({ pre, post, save, onReplay }: Props) {
   return (
     <div className="res pop">
       <div className="hero">
@@ -35,6 +37,9 @@ export function ResultStep({ pre, post, save }: { pre: Answers; post: Answers; s
           <a className="go block" href="#stats">
             みんなの回答を見る 📊
           </a>
+          <button className="ghost block" type="button" onClick={onReplay}>
+            もう一度AIで遊ぶ 🔁
+          </button>
         </div>
       )}
     </div>
