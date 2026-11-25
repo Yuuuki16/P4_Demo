@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 )
 
 // 環境変数
@@ -35,7 +36,7 @@ func main() {
 	NewServer(store).Routes(mux)
 
 	if dir := os.Getenv("STATIC_DIR"); dir != "" {
-		mux.Handle("/", http.FileServer(http.Dir(dir)))
+		mux.Handle("/", staticHandler(dir))
 	}
 
 	handler := withCORS(os.Getenv("ALLOWED_ORIGIN"), mux)
@@ -63,4 +64,21 @@ func getenv(key, fallback string) string {
 		return v
 	}
 	return fallback
+}
+
+// staticHandler はビルド済みのフロント（web/dist）を配信する。
+//
+// /assets/ の中のファイルは、中身が変わるとファイル名（index-XXXX.js）も変わるので、ブラウザに長く覚えさせてよい。
+// index.html は毎回サーバーに確認させる。そうしないと、ブラウザが古い index.html を使い回し、
+// デプロイで消えた古い index-XXXX.js を読みに行って 404 になる（画面が真っ白になる）。
+func staticHandler(dir string) http.Handler {
+	files := http.FileServer(http.Dir(dir))
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if strings.HasPrefix(r.URL.Path, "/assets/") {
+			w.Header().Set("Cache-Control", "public, max-age=31536000, immutable")
+		} else {
+			w.Header().Set("Cache-Control", "no-cache")
+		}
+		files.ServeHTTP(w, r)
+	})
 }
