@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"log"
 	"net/http"
 	"os"
@@ -9,13 +10,26 @@ import (
 // 環境変数
 //
 //	PORT           待ち受けるポート（デフォルト 8080）
-//	DATA_FILE      回答を保存するファイル（デフォルト responses.jsonl）
+//	DATABASE_URL   指定すると、回答を PostgreSQL に保存する（例: postgres://user:pass@host:5432/db）
+//	DATA_FILE      DATABASE_URL がないときに回答を保存するファイル（デフォルト responses.jsonl）
 //	STATIC_DIR     指定すると、ビルド済みのフロント（web/dist）も同じサーバーから配信する
 //	ALLOWED_ORIGIN フロントを別ドメインに置くときに許可するオリジン（例: https://example.vercel.app）
 func main() {
 	port := getenv("PORT", "8080")
 
-	store := NewFileStore(getenv("DATA_FILE", "responses.jsonl"))
+	var store Store
+	if url := os.Getenv("DATABASE_URL"); url != "" {
+		pg, err := NewPostgresStore(context.Background(), url)
+		if err != nil {
+			log.Fatalf("database: %v", err)
+		}
+		store = pg
+		log.Printf("storage: PostgreSQL")
+	} else {
+		path := getenv("DATA_FILE", "responses.jsonl")
+		store = NewFileStore(path)
+		log.Printf("storage: file %s", path)
+	}
 
 	mux := http.NewServeMux()
 	NewServer(store).Routes(mux)

@@ -21,9 +21,10 @@ web/       フロントエンド（Vite + React + TypeScript）
   src/data/                   履歴書データとアンケートの質問
   src/components/             各画面
   src/api.ts                  Goサーバーとの通信
-server/    バックエンド（Go 標準ライブラリのみ）
+server/    バックエンド（Go。外部ライブラリは Postgres ドライバ pgx のみ）
   handlers.go                 API（回答の保存・集計）
-  store.go                    回答の保存先（今は JSON Lines ファイル）
+  store.go                    回答の保存先：JSON Lines ファイル（ローカル開発用）
+  store_postgres.go           回答の保存先：PostgreSQL（本番用。DATABASE_URL があると使う）
   main.go                     起動・設定
 ```
 
@@ -49,7 +50,7 @@ npm run test:watch  # 保存するたびに自動で実行
 
 ## 動かし方
 
-必要なもの：Node.js 20以上、Go 1.22以上
+必要なもの：Node.js 20以上、Go 1.25以上
 
 ```bash
 # ターミナル1：Goサーバー（http://localhost:8080）
@@ -69,6 +70,13 @@ npm run dev
 ```bash
 cd server && go test ./...
 cd web && npm test
+```
+
+Postgres 版の保存処理もテストするときは、テスト用の空のDBを用意して `TEST_DATABASE_URL` を指定します（テストのたびにテーブルを空にするので、本番のDBは指定しないこと）。
+
+```bash
+createdb blackbox_test
+cd server && TEST_DATABASE_URL=postgres://localhost:5432/blackbox_test go test ./...
 ```
 
 ## API
@@ -101,14 +109,15 @@ cd web && npm run build
 cd ../server && STATIC_DIR=../web/dist go run .
 ```
 
-Render や Fly.io などGoを動かせるサービスにそのまま置けます。ただし今は回答をファイルに保存しているので、再起動でファイルが消えるサービスでは、永続ディスクを付けるか `Store` をデータベース版に差し替えてください（`server/store.go` の `Store` インターフェースを満たす型を作るだけで済みます）。
+Render や Fly.io などGoを動かせるサービスにそのまま置けます。ただし再起動でファイルが消えるサービスでは、`DATABASE_URL` を設定して回答を PostgreSQL に保存してください。
 
 フロントを Vercel などに別で置く場合は、フロントのビルド時に `VITE_API_URL`（GoサーバーのURL）を、Goサーバーに `ALLOWED_ORIGIN`（フロントのURL）を設定します。
 
 | 環境変数（server） | 既定値 | 内容 |
 | --- | --- | --- |
 | `PORT` | `8080` | 待ち受けポート |
-| `DATA_FILE` | `responses.jsonl` | 回答の保存先 |
+| `DATABASE_URL` | なし | 指定すると回答を PostgreSQL に保存 |
+| `DATA_FILE` | `responses.jsonl` | `DATABASE_URL` がないときの保存先ファイル |
 | `STATIC_DIR` | なし | 指定するとビルド済みフロントも配信 |
 | `ALLOWED_ORIGIN` | なし | 別ドメインのフロントからのアクセスを許可 |
 
