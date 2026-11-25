@@ -1,5 +1,5 @@
 import { DATASETS, TEST_RESUMES } from '../data/datasets'
-import { judge, train } from '../lib/classifier'
+import { judge, tokenize, train } from '../lib/classifier'
 import type { PresetId } from '../lib/types'
 
 // 解説に出す数字は、ここで実際に学習させて計算する（文章と実際の動きがずれないように）
@@ -30,8 +30,8 @@ export function HowItWorks() {
         </h3>
         <p>AIは文章の意味を理解していません。まず文章をバラバラの単語にします。</p>
         <p className="example">
-          「男子サッカー部に所属。Pythonでウェブアプリを開発。」
-          <br />→ 男子 / サッカー / 部 / 所属 / python / ウェブアプリ / 開発
+          「男子サッカー部に所属。海外留学で英語を勉強。」
+          <br />→ 男子 / サッカー / 部 / 所属 / 海外留学 / 英語 / 勉強
         </p>
         <p className="mute">
           「に」「で」のようなひらがなや句読点は捨てます。AIにとって履歴書は、単語の入った袋のようなものです。
@@ -77,7 +77,7 @@ export function HowItWorks() {
         </p>
         <p className="example">
           男子 <b className="plus">{fmt(modelA.weights['男子'])}</b>　／　女子{' '}
-          <b className="minus">{fmt(modelA.weights['女子'])}</b>　／　python {fmt(modelA.weights['python'])}
+          <b className="minus">{fmt(modelA.weights['女子'])}</b>　／　サッカー {fmt(modelA.weights['サッカー'])}
         </p>
         <p className="mute">AIが「覚えた」ものは、この単語と数字の表がすべて。ルールや理由は覚えていません。</p>
       </div>
