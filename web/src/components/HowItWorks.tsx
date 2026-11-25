@@ -77,7 +77,7 @@ export function HowItWorks() {
         </p>
         <p className="example">
           男子 <b className="plus">{fmt(modelA.weights['男子'])}</b>　／　女子{' '}
-          <b className="minus">{fmt(modelA.weights['女子'])}</b>　／　サッカー {fmt(modelA.weights['サッカー'])}
+          <b className="minus">{fmt(modelA.weights['女子'])}</b>　／　部 {fmt(modelA.weights['部'] ?? 0)}
         </p>
         <p className="mute">AIが「覚えた」ものは、この単語と数字の表がすべて。ルールや理由は覚えていません。</p>
       </div>
