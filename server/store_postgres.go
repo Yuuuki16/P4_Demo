@@ -28,7 +28,11 @@ CREATE TABLE IF NOT EXISTS responses (
 	post_understand SMALLINT    NOT NULL,
 	post_fixable    SMALLINT    NOT NULL,
 	created_at      TIMESTAMPTZ NOT NULL
-)`
+);
+-- Supabase では public スキーマのテーブルが Data API（anon キー）から見えてしまう。
+-- RLS を有効にしてポリシーを作らなければ、API からは読み書きできなくなる。
+-- テーブルの所有者（このサーバーが接続するユーザー）は RLS の対象外なので、アプリの動作は変わらない。
+ALTER TABLE responses ENABLE ROW LEVEL SECURITY;`
 
 // NewPostgresStore は DB に接続し、テーブルがなければ作る。
 func NewPostgresStore(ctx context.Context, databaseURL string) (*PostgresStore, error) {
