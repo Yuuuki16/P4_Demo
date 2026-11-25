@@ -55,6 +55,6 @@ export const initialCustomResumes = (): Resume[] => DATASETS.A.resumes.map((r) =
 
 /** 1語だけ違う、判定用の履歴書 */
 export const TEST_RESUMES = [
-  '男子チェス部に所属。Pythonでウェブアプリを開発。',
-  '女子チェス部に所属。Pythonでウェブアプリを開発。',
+  '男子サッカー部に所属。Pythonでウェブアプリを開発。',
+  '女子サッカー部に所属。Pythonでウェブアプリを開発。',
 ] as const

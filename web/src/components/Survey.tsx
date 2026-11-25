@@ -12,8 +12,7 @@ export function Survey({ answers, onChange }: Props) {
       {QUESTIONS.map((q) => (
         <fieldset className="q" key={q.id}>
           <legend>{q.text}</legend>
-          <div className="scale">
-            <span>そう思わない</span>
+          <div className="scale" role="group" aria-label={`${q.text}（1 = そう思わない、5 = そう思う）`}>
             {[1, 2, 3, 4, 5].map((v) => (
               <button
                 key={v}
@@ -25,7 +24,10 @@ export function Survey({ answers, onChange }: Props) {
                 {v}
               </button>
             ))}
-            <span>そう思う</span>
+          </div>
+          <div className="scale-labels" aria-hidden="true">
+            <span>← そう思わない</span>
+            <span>そう思う →</span>
           </div>
         </fieldset>
       ))}

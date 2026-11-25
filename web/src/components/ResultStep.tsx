@@ -6,7 +6,12 @@ type SaveState = 'idle' | 'saving' | 'saved' | 'error'
 
 export function ResultStep({ pre, post, save }: { pre: Answers; post: Answers; save: SaveState }) {
   return (
-    <div className="res">
+    <div className="res pop">
+      <div className="hero">
+        <div className="icon" aria-hidden="true">🎊</div>
+        <h2>おつかれさまでした！</h2>
+        <p className="lead">体験の前と後で、気持ちはこう変わりました。</p>
+      </div>
       {QUESTIONS.map((q) => {
         const d = post[q.id] - pre[q.id]
         return (
@@ -14,8 +19,8 @@ export function ResultStep({ pre, post, save }: { pre: Answers; post: Answers; s
             <p className="qtitle">
               {q.text} <span className="delta">{d > 0 ? `+${d}` : d}</span>
             </p>
-            <Bar label="前" value={pre[q.id]} color="var(--dusk)" />
-            <Bar label="後" value={post[q.id]} color="var(--rose)" />
+            <Bar label="前" value={pre[q.id]} color="var(--pre)" />
+            <Bar label="後" value={post[q.id]} color="var(--post)" />
           </div>
         )
       })}
@@ -26,24 +31,24 @@ export function ResultStep({ pre, post, save }: { pre: Answers; post: Answers; s
       </p>
       <HowItWorks />
       {save !== 'saving' && (
-        <p className="row">
-          <a className="go" href="#stats">
-            みんなの回答（集計）を見る →
+        <div className="cta">
+          <a className="go block" href="#stats">
+            みんなの回答を見る 📊
           </a>
-        </p>
+        </div>
       )}
     </div>
   )
 }
 
-export function Bar({ label, value, color }: { label: string; value: number; color: string }) {
+export function Bar({ label, value, color, decimals = false }: { label: string; value: number; color: string; decimals?: boolean }) {
   return (
     <div className="bar">
       <span>{label}</span>
       <div>
         <i style={{ width: `${(value / 5) * 100}%`, background: color }} />
       </div>
-      <span>{Number.isInteger(value) ? value : value.toFixed(2)}</span>
+      <span>{decimals ? value.toFixed(2) : value}</span>
     </div>
   )
 }

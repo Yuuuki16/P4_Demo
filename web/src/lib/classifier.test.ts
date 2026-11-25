@@ -6,7 +6,7 @@ const [MEN, WOMEN] = TEST_RESUMES
 
 describe('tokenize', () => {
   it('漢字・カタカナ・英字のまとまりを単語にし、ひらがなと記号は捨てる', () => {
-    expect(tokenize(MEN)).toEqual(['男子', 'チェス', '部', '所属', 'python', 'ウェブアプリ', '開発'])
+    expect(tokenize(MEN)).toEqual(['男子', 'サッカー', '部', '所属', 'python', 'ウェブアプリ', '開発'])
   })
 
   it('同じ単語は1回だけ数える', () => {

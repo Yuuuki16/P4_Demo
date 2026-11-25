@@ -9,7 +9,7 @@ import { DATASETS, initialCustomResumes } from './data/datasets'
 import { train } from './lib/classifier'
 import type { Answers, DatasetId, Model, Resume } from './lib/types'
 
-const STEPS = ['1 · 体験前', '2 · AIを育てる', '3 · 中をのぞく', '4 · 体験後'] as const
+const STEPS = ['はじめに', 'AIを育てる', '中をのぞく', 'ふりかえり'] as const
 
 export default function App() {
   const [hash, setHash] = useState(location.hash)
@@ -21,11 +21,24 @@ export default function App() {
 
   return (
     <div className="wrap">
-      <h1>ブラックボックスを開けよう</h1>
-      <p className="mute">AIがどうやって人を判断するようになるのか、その間違いはどこから来るのか。5分で体験します。</p>
-      {hash === '#stats' ? <StatsPage /> : <Experience />}
+      {hash === '#stats' ? (
+        <>
+          <header className="appbar">
+            <h1>
+              <a href="#">
+                <span aria-hidden="true">📦</span> ブラックボックスを開けよう
+              </a>
+            </h1>
+          </header>
+          <main>
+            <StatsPage />
+          </main>
+        </>
+      ) : (
+        <Experience />
+      )}
       <p className="small footer">
-        英語の授業プロジェクト用のプロダクトです。履歴書は架空のサンプルデータで、AIはブラウザ内で動く、単語を数えるだけの小さなモデルです。
+        英語の授業プロジェクト用のアプリです。履歴書は架空のサンプルデータで、AIはブラウザの中で動く、単語を数えるだけの小さなモデルです。
       </p>
     </div>
   )
@@ -94,28 +107,47 @@ function Experience() {
 
   return (
     <>
-      <nav>
-        {STEPS.map((label, i) => (
-          <button
-            key={label}
-            type="button"
-            disabled={!reachable[i]}
-            className={i === step ? 'on' : i < step ? 'done' : ''}
-            onClick={() => go(i)}
-          >
-            {label}
-          </button>
-        ))}
-      </nav>
+      <header className="appbar">
+        <h1>
+          <span aria-hidden="true">📦</span> ブラックボックスを開けよう
+        </h1>
+        <nav className="progress" aria-label="進み具合">
+          {STEPS.map((label, i) => (
+            <button
+              key={label}
+              type="button"
+              disabled={!reachable[i]}
+              className={i === step ? 'on' : i < step ? 'done' : ''}
+              aria-current={i === step ? 'step' : undefined}
+              onClick={() => go(i)}
+            >
+              {label}
+            </button>
+          ))}
+        </nav>
+      </header>
 
+      <main>
       {step === 0 && (
         <section>
-          <h2>まず、AIについてどう感じていますか？</h2>
-          <p className="mute">正解はありません。1 = まったくそう思わない、5 = とてもそう思う。</p>
+          <div className="hero">
+            <div className="icon" aria-hidden="true">🤖</div>
+            <h2>AIの「頭の中」をのぞいてみよう</h2>
+            <p className="lead">
+              AIはどうやって人を判断するようになるの？ まちがいはどこから来るの？ 5分で体験できます。
+            </p>
+          </div>
+          <div className="bubble">
+            <p>
+              <span className="emoji" aria-hidden="true">💬</span>
+              まずは、いまの気持ちを教えてください。正解はありません。
+            </p>
+          </div>
           <Survey answers={pre} onChange={(id, v) => setPre((a) => ({ ...a, [id]: v }))} />
-          <div className="row">
-            <button className="go" type="button" disabled={!isComplete(pre)} onClick={() => go(1)}>
-              はじめる
+          <div className="cta">
+            {!isComplete(pre) && <p className="hint">3つすべてに答えると進めます</p>}
+            <button className="go block" type="button" disabled={!isComplete(pre)} onClick={() => go(1)}>
+              はじめる 🚀
             </button>
           </div>
         </section>
@@ -157,22 +189,27 @@ function Experience() {
 
       {step === 3 && (
         <section>
-          <h2>いま、AIについてどう感じますか？</h2>
-          <p className="mute">最初と同じ3つの質問です。</p>
+          <div className="hero">
+            <div className="icon" aria-hidden="true">💭</div>
+            <h2>いま、AIについてどう感じますか？</h2>
+            <p className="lead">最初と同じ3つの質問です。気持ちは変わったかな？</p>
+          </div>
           <Survey
             answers={post}
             onChange={(id, v) => !finished && setPost((a) => ({ ...a, [id]: v }))}
           />
           {!finished && (
-            <div className="row">
-              <button className="go" type="button" disabled={!isComplete(post)} onClick={handleFinish}>
-                回答して変化を見る
+            <div className="cta">
+              {!isComplete(post) && <p className="hint">3つすべてに答えると進めます</p>}
+              <button className="go block" type="button" disabled={!isComplete(post)} onClick={handleFinish}>
+                回答して変化を見る ✨
               </button>
             </div>
           )}
           {finished && isComplete(pre) && isComplete(post) && <ResultStep pre={pre} post={post} save={save} />}
         </section>
       )}
+      </main>
     </>
   )
 }
