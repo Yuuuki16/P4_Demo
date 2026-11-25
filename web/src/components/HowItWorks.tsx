@@ -30,8 +30,8 @@ export function HowItWorks() {
         </h3>
         <p>AIは文章の意味を理解していません。まず文章をバラバラの単語にします。</p>
         <p className="example">
-          「男子サッカー部に所属。海外留学で英語を勉強。」
-          <br />→ 男子 / サッカー / 部 / 所属 / 海外留学 / 英語 / 勉強
+          「{MEN}」
+          <br />→ {tokenize(MEN).join(' / ')}
         </p>
         <p className="mute">
           「に」「で」のようなひらがなや句読点は捨てます。AIにとって履歴書は、単語の入った袋のようなものです。
