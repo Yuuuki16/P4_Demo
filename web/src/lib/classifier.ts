@@ -22,9 +22,10 @@ import { isWord, splitPieces } from './text'
  *     → ["男子", "チェス", "部", "所属", "python", "開発"]
  */
 export function tokenize(text: string): string[] {
-  // TODO: 実装する（実装したら下の void の行は消す）
-  void [text, splitPieces, isWord]
-  throw new Error('tokenize がまだ実装されていません（src/lib/classifier.ts）')
+  const words = splitPieces(text)
+    .filter(isWord)
+    .map((w) => w.toLowerCase())
+  return [...new Set(words)]
 }
 
 /**
@@ -47,9 +48,29 @@ export function tokenize(text: string): string[] {
  * 使うもの：Math.log、tokenize、Record<string, number>（単語 → 件数 の表）
  */
 export function train(resumes: Resume[]): Model {
-  // TODO: 実装する（実装したら下の void の行は消す）
-  void resumes
-  throw new Error('train がまだ実装されていません（src/lib/classifier.ts）')
+  // (1)(2) 採用・不採用それぞれで「その単語が出てきた履歴書の件数」を数える
+  const hiredCounts = new Map<string, number>()
+  const rejectedCounts = new Map<string, number>()
+  let hiredTotal = 0
+  let rejectedTotal = 0
+  for (const r of resumes) {
+    const counts = r.hired ? hiredCounts : rejectedCounts
+    if (r.hired) hiredTotal++
+    else rejectedTotal++
+    for (const w of tokenize(r.text)) counts.set(w, (counts.get(w) ?? 0) + 1)
+  }
+
+  // (3) 出てきた全単語の重み（ラプラス・スムージング付きの対数比）
+  const weights: Record<string, number> = {}
+  for (const w of new Set([...hiredCounts.keys(), ...rejectedCounts.keys()])) {
+    weights[w] =
+      Math.log(((hiredCounts.get(w) ?? 0) + 1) / (hiredTotal + 2)) -
+      Math.log(((rejectedCounts.get(w) ?? 0) + 1) / (rejectedTotal + 2))
+  }
+
+  // (4) 事前の傾き
+  const prior = Math.log(hiredTotal / rejectedTotal)
+  return { weights, prior }
 }
 
 /**
@@ -66,7 +87,10 @@ export function train(resumes: Resume[]): Model {
  * 0.5 以上なら「採用」と表示されます。
  */
 export function judge(model: Model, text: string): number {
-  // TODO: 実装する（実装したら下の void の行は消す）
-  void [model, text]
-  throw new Error('judge がまだ実装されていません（src/lib/classifier.ts）')
+  let score = model.prior
+  for (const w of tokenize(text)) {
+    // "constructor" などの英単語で Object の組み込みプロパティを拾わないよう、自分のキーだけ見る
+    if (Object.hasOwn(model.weights, w)) score += model.weights[w]
+  }
+  return 1 / (1 + Math.exp(-score))
 }
