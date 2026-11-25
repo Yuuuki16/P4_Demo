@@ -4,11 +4,14 @@ export type Resume = {
   hired: boolean
 }
 
-/** データセット（A: 偏った過去の判断 / B: バランスのとれた判断） */
-export type DatasetId = 'A' | 'B'
+/** 用意済みのデータセット（A: 偏った過去の判断 / B: バランスのとれた判断） */
+export type PresetId = 'A' | 'B'
+
+/** 学習に使ったデータ。C は利用者が自分で採用・不採用を決めたもの */
+export type DatasetId = PresetId | 'C'
 
 export type Dataset = {
-  id: DatasetId
+  id: PresetId
   name: string
   note: string
   resumes: Resume[]

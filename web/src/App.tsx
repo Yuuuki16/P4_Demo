@@ -5,9 +5,9 @@ import { StatsPage } from './components/StatsPage'
 import { Survey, isComplete } from './components/Survey'
 import { TestStep } from './components/TestStep'
 import { TrainStep } from './components/TrainStep'
-import { DATASETS } from './data/datasets'
+import { DATASETS, initialCustomResumes } from './data/datasets'
 import { train } from './lib/classifier'
-import type { Answers, DatasetId, Model } from './lib/types'
+import type { Answers, DatasetId, Model, Resume } from './lib/types'
 
 const STEPS = ['1 · 体験前', '2 · AIを育てる', '3 · 中をのぞく', '4 · 体験後'] as const
 
@@ -38,6 +38,7 @@ function Experience() {
   const [selected, setSelected] = useState<DatasetId>('A')
   const [model, setModel] = useState<Model | null>(null)
   const [trainedOn, setTrainedOn] = useState<DatasetId | null>(null)
+  const [customResumes, setCustomResumes] = useState<Resume[]>(initialCustomResumes)
   const [trainError, setTrainError] = useState<string | null>(null)
   const [finished, setFinished] = useState(false)
   const [save, setSave] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
@@ -49,9 +50,28 @@ function Experience() {
     scrollTo({ top: 0 })
   }
 
+  const resumesOf = (id: DatasetId) => (id === 'C' ? customResumes : DATASETS[id].resumes)
+
+  // 「自分で決める」の判断を変えたら、それで学習したモデルは古くなるので捨てる
+  const changeCustom = (next: Resume[]) => {
+    setCustomResumes(next)
+    if (trainedOn === 'C') {
+      setModel(null)
+      setTrainedOn(null)
+    }
+  }
+
   const handleTrain = () => {
+    const resumes = resumesOf(selected)
+    const hired = resumes.filter((r) => r.hired).length
+    if (hired === 0 || hired === resumes.length) {
+      setModel(null)
+      setTrainedOn(null)
+      setTrainError('採用と不採用を、少なくとも1件ずつ選んでください（どちらかしかないと、AIは比べて学ぶことができません）。')
+      return
+    }
     try {
-      setModel(train(DATASETS[selected].resumes))
+      setModel(train(resumes))
       setTrainedOn(selected)
       setTrainError(null)
     } catch (e) {
@@ -104,9 +124,16 @@ function Experience() {
       {step === 1 && (
         <TrainStep
           selected={selected}
-          onSelect={setSelected}
+          onSelect={(id) => {
+            setSelected(id)
+            setTrainError(null)
+          }}
+          resumes={resumesOf(selected)}
+          onToggle={(i) => changeCustom(customResumes.map((r, j) => (j === i ? { ...r, hired: !r.hired } : r)))}
+          onCopyFrom={(id) => changeCustom(DATASETS[id].resumes.map((r) => ({ ...r })))}
           model={model}
           trainedOn={trainedOn}
+          trainedCount={trainedOn ? resumesOf(trainedOn).length : 0}
           error={trainError}
           onTrain={handleTrain}
           onNext={() => go(2)}

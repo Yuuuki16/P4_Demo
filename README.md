@@ -98,7 +98,7 @@ cd server && TEST_DATABASE_URL=postgres://localhost:5432/blackbox_test go test .
 }
 ```
 
-回答は1〜5のみ受け付けます。名前などの個人情報は保存しません。
+回答は1〜5のみ受け付けます。`dataset` は学習に使ったデータ（`A`・`B`、自分で採用・不採用を決めた場合は `C`）で、省略もできます。名前などの個人情報は保存しません。
 
 ## 公開するとき
 

@@ -54,8 +54,8 @@ func validate(r Response) error {
 	if r.ID == "" || len(r.ID) > 64 {
 		return fmt.Errorf("id が不正です")
 	}
-	if r.Dataset != nil && *r.Dataset != "A" && *r.Dataset != "B" {
-		return fmt.Errorf("dataset は A か B です")
+	if r.Dataset != nil && *r.Dataset != "A" && *r.Dataset != "B" && *r.Dataset != "C" {
+		return fmt.Errorf("dataset は A・B・C のいずれかです")
 	}
 	for name, a := range map[string]Answers{"pre": r.Pre, "post": r.Post} {
 		for _, v := range []int{a.Scary, a.Understand, a.Fixable} {

@@ -15,7 +15,11 @@ export function TestStep({ model, trainedOn, onRetrainBalanced, onNext }: Props)
   const [texts, setTexts] = useState<string[]>([...TEST_RESUMES])
   const [judged, setJudged] = useState(false)
   const [open, setOpen] = useState(false)
-  const biased = trainedOn === 'A'
+  // 「男子」と「女子」の重みの差で、性別による偏りを学んだかどうかを見る
+  const wMen = weightOf(model, '男子')
+  const wWomen = weightOf(model, '女子')
+  const biased = Math.abs(wMen - wWomen) > 0.01
+  const disfavored = wMen < wWomen ? '男子' : '女子'
 
   return (
     <section>
@@ -65,8 +69,10 @@ export function TestStep({ model, trainedOn, onRetrainBalanced, onNext }: Props)
           <div className="status">
             {biased ? (
               <p>
-                AIは「性別で判断しろ」とは一度も教わっていません。過去に判断した人間に偏りがあったため、<b>女子</b>
-                という語が不採用の履歴書にしか出てこないことを学んだのです。
+                AIは「性別で判断しろ」とは一度も教わっていません。
+                {trainedOn === 'C' ? 'あなたが付けた採用・不採用' : '過去に判断した人間の採用・不採用'}
+                では、<b>{disfavored}</b>
+                という語が不採用の側に多く出てきました。AIはその偏りを、そのまま数字として学んだのです。
                 <b>偏りはデータを通して、私たち人間から来ています。</b>
               </p>
             ) : (
@@ -94,6 +100,10 @@ export function TestStep({ model, trainedOn, onRetrainBalanced, onNext }: Props)
       )}
     </section>
   )
+}
+
+function weightOf(model: Model, word: string): number {
+  return Object.hasOwn(model.weights, word) ? model.weights[word] : 0
 }
 
 function Verdict({ p }: { p: number }) {

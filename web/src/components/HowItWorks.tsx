@@ -1,5 +1,6 @@
 import { DATASETS, TEST_RESUMES } from '../data/datasets'
 import { judge, train } from '../lib/classifier'
+import type { PresetId } from '../lib/types'
 
 // 解説に出す数字は、ここで実際に学習させて計算する（文章と実際の動きがずれないように）
 const modelA = train(DATASETS.A.resumes)
@@ -8,7 +9,7 @@ const [MEN, WOMEN] = TEST_RESUMES
 
 const fmt = (x: number) => (x > 0 ? '+' : x < 0 ? '−' : '±') + Math.abs(x).toFixed(1)
 const pct = (p: number) => `${Math.round(p * 100)}%`
-const count = (id: 'A' | 'B', word: string, hired: boolean) =>
+const count = (id: PresetId, word: string, hired: boolean) =>
   DATASETS[id].resumes.filter((r) => r.hired === hired && r.text.includes(word)).length
 
 /** 結果画面に出す「このAIはどうやって学んだのか」の解説 */

@@ -30,6 +30,7 @@ func TestSaveAndStats(t *testing.T) {
 	bodies := []string{
 		`{"id":"a","dataset":"B","pre":{"scary":4,"understand":1,"fixable":2},"post":{"scary":2,"understand":4,"fixable":5}}`,
 		`{"id":"b","dataset":"A","pre":{"scary":2,"understand":3,"fixable":2},"post":{"scary":2,"understand":4,"fixable":3}}`,
+		`{"id":"c","dataset":"C","pre":{"scary":3,"understand":2,"fixable":2},"post":{"scary":2,"understand":4,"fixable":4}}`,
 	}
 	for _, b := range bodies {
 		if rec := do(h, "POST", "/api/responses", b); rec.Code != http.StatusCreated {
@@ -42,7 +43,7 @@ func TestSaveAndStats(t *testing.T) {
 	if err := json.NewDecoder(rec.Body).Decode(&got); err != nil {
 		t.Fatal(err)
 	}
-	if got.Count != 2 || got.Pre.Scary != 3 || got.Post.Fixable != 4 {
+	if got.Count != 3 || got.Pre.Scary != 3 || got.Post.Fixable != 4 {
 		t.Errorf("stats = %+v", got)
 	}
 }
