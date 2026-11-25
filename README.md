@@ -110,6 +110,13 @@ cd server && TEST_DATABASE_URL=postgres://localhost:5432/blackbox_test go test .
 
 接続URLはパスワードを含む秘密情報です。Git にコミットせず、サービスの環境変数（Secret）に入れてください。多くのサービスでは末尾に `?sslmode=require` が必要です。
 
+### Supabase を使う場合
+
+- 接続URLは、プロジェクト画面上部の **Connect** から **Session pooler** のものを使う（`postgres://postgres.<プロジェクトID>:<パスワード>@<リージョン>.pooler.supabase.com:5432/postgres`）
+  - Direct connection（`db.<プロジェクトID>.supabase.co`）は IPv6 のみのことが多く、Render など IPv6 で外に出られないサービスからはつながらない
+  - Transaction pooler（ポート `6543`）は、このサーバーが使う prepared statement に対応していないので使わない
+- `responses` テーブルはサーバーが自動で作り、行レベルセキュリティ（RLS）を有効にする。ポリシーは作らないので、Supabase の Data API（anon キー）からは読み書きできない。回答を見るときは、Supabase の Table Editor か `/#stats` を使う
+
 手元で本番と同じ形を試すとき：
 
 ```bash

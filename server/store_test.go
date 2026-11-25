@@ -71,6 +71,22 @@ func TestPostgresStore(t *testing.T) {
 		return s
 	})
 
+	t.Run("RLSが有効になっている", func(t *testing.T) {
+		s, err := NewPostgresStore(context.Background(), url)
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer s.Close()
+		var enabled bool
+		if err := s.pool.QueryRow(context.Background(),
+			"SELECT relrowsecurity FROM pg_class WHERE oid = 'responses'::regclass").Scan(&enabled); err != nil {
+			t.Fatal(err)
+		}
+		if !enabled {
+			t.Error("responses テーブルの RLS が無効です")
+		}
+	})
+
 	t.Run("同じidは二重に保存しない", func(t *testing.T) {
 		s, err := NewPostgresStore(context.Background(), url)
 		if err != nil {
