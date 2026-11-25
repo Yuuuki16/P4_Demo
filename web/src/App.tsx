@@ -60,6 +60,8 @@ function Experience() {
   // アンケートは1ブラウザ1回。回答済みなら、アンケートを出さずにAIのデモだけ遊べる
   const [answeredBefore] = useState(hasAnswered)
   const [replaying, setReplaying] = useState(false)
+  // 最初の画面で「はじめて」を選んだか（選ぶまではアンケートを出さず、入口を2つ見せる）
+  const [firstTime, setFirstTime] = useState(false)
   const surveyDone = answeredBefore || replaying
 
   const reachable = [true, surveyDone || isComplete(pre), model !== null, model !== null]
@@ -169,7 +171,7 @@ function Experience() {
         </section>
       )}
 
-      {step === 0 && !surveyDone && (
+      {step === 0 && !surveyDone && !firstTime && (
         <section>
           <div className="hero">
             <div className="icon" aria-hidden="true">🤖</div>
@@ -178,10 +180,37 @@ function Experience() {
               AIはどうやって人を判断するようになるの？ まちがいはどこから来るの？ 5分で体験できます。
             </p>
           </div>
+          <h3>あなたはどっち？</h3>
+          <div className="sets">
+            <button type="button" className="set" onClick={() => setFirstTime(true)}>
+              <span className="icon" aria-hidden="true">✨</span>
+              <span>
+                <b>はじめて体験する</b>
+                <span className="mute">かんたんなアンケート（体験の前と後に3問ずつ）に答えながら、AIを育てて中をのぞきます。</span>
+              </span>
+            </button>
+            <button type="button" className="set" onClick={replay}>
+              <span className="icon" aria-hidden="true">🎮</span>
+              <span>
+                <b>アンケートはもう答えた</b>
+                <span className="mute">別のスマホで答えた人もこちら。アンケートなしで、AIのデモだけを何回でも遊べます。</span>
+              </span>
+            </button>
+          </div>
+          <p className="small">アンケートの回答は匿名で集計され、授業の発表に使います。1人1回までお願いします。</p>
+        </section>
+      )}
+
+      {step === 0 && !surveyDone && firstTime && (
+        <section>
+          <div className="hero">
+            <div className="icon" aria-hidden="true">✨</div>
+            <h2>まずは、いまの気持ちを教えてください</h2>
+          </div>
           <div className="bubble">
             <p>
               <span className="emoji" aria-hidden="true">💬</span>
-              まずは、いまの気持ちを教えてください。正解はありません。
+              正解はありません。直感で選んでください。
             </p>
           </div>
           <Survey answers={pre} onChange={(id, v) => setPre((a) => ({ ...a, [id]: v }))} />
@@ -189,6 +218,9 @@ function Experience() {
             {!isComplete(pre) && <p className="hint">3つすべてに答えると進めます</p>}
             <button className="go block" type="button" disabled={!isComplete(pre)} onClick={() => go(1)}>
               はじめる 🚀
+            </button>
+            <button className="link-button" type="button" onClick={() => setFirstTime(false)}>
+              ← 最初の画面に戻る
             </button>
           </div>
         </section>
