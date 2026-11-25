@@ -78,10 +78,16 @@ type StatsResponse struct {
 	Count int      `json:"count"`
 	Pre   Averages `json:"pre"`
 	Post  Averages `json:"post"`
+	// 以下は集計ページの分析用（stats.go）
+	Questions      []QuestionStats `json:"questions"`
+	Datasets       []DatasetStats  `json:"datasets"`
+	LastResponseAt *time.Time      `json:"lastResponseAt"`
 }
 
-// GET /api/stats  体験前と体験後の平均を返す
+// GET /api/stats  体験前と体験後の平均と、集計ページ用の分析を返す
 func (s *Server) stats(w http.ResponseWriter, _ *http.Request) {
+	// 集計ページは数秒ごとに取り直すので、途中でキャッシュされないようにする
+	w.Header().Set("Cache-Control", "no-store")
 	all, err := s.store.All()
 	if err != nil {
 		log.Printf("load responses: %v", err)
@@ -92,7 +98,10 @@ func (s *Server) stats(w http.ResponseWriter, _ *http.Request) {
 }
 
 func summarize(all []Response) StatsResponse {
-	out := StatsResponse{Count: len(all)}
+	out := StatsResponse{Count: len(all), LastResponseAt: lastResponseAt(all), Datasets: analyzeDatasets(all)}
+	for _, q := range questions {
+		out.Questions = append(out.Questions, analyzeQuestion(q, all))
+	}
 	if len(all) == 0 {
 		return out
 	}

@@ -13,8 +13,8 @@
   --yes-soft: #dcf5f0;
   --no: #ff6b81;       /* 不採用 */
   --no-soft: #ffe3e8;
-  --pre: #b5a7d6;      /* アンケート「前」 */
-  --post: #ff9f6b;     /* アンケート「後」 */
+  --pre: #e8916f;      /* アンケート「前」（後と同じ色相の淡い方。dataviz の検証済み） */
+  --post: #b23c17;     /* アンケート「後」 */
   --shadow: 0 2px 0 rgba(59, 47, 42, 0.06), 0 6px 20px rgba(59, 47, 42, 0.06);
   --radius: 20px;
   --safe-bottom: env(safe-area-inset-bottom, 0px);
@@ -221,3 +221,24 @@ select {
 .builder .small-button { margin-top: 14px; min-height: 44px; padding: 8px 16px; font-size: 15px; }
 .consent p { margin: 0 0 12px; line-height: 1.9; font-size: 15px; }
 .consent p:last-child { margin-bottom: 0; }
+
+/* ===== 集計ページ ===== */
+.live { display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 13px; color: var(--mute); margin: 0 0 12px; }
+.live .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--yes); animation: blink 2s ease-in-out infinite; }
+@keyframes blink { 50% { opacity: 0.3; } }
+@media (prefers-reduced-motion: reduce) { .live .dot { animation: none; } }
+.kpi { text-align: center; }
+.qstats .means { margin: 0 0 4px; font-size: 14px; color: var(--mute); }
+.qstats .sub { margin: 16px 0 6px; font-size: 13px; font-weight: 700; color: var(--mute); }
+.dist { display: grid; gap: 6px; }
+.dist-row { display: grid; grid-template-columns: 20px minmax(0, 1fr); gap: 8px; align-items: center; font-size: 13px; color: var(--mute); }
+.dist-bars { display: grid; gap: 2px; }
+.dist-bar { display: grid; grid-template-columns: minmax(0, 1fr) 28px; gap: 6px; align-items: center; }
+.dist-bar i { display: block; height: 8px; min-width: 2px; border-radius: 0 4px 4px 0; }
+.dist-bar span { font-size: 12px; text-align: right; }
+.changes { display: flex; flex-wrap: wrap; gap: 6px; font-size: 13px; font-weight: 700; }
+.changes span { background: var(--soft); border-radius: 999px; padding: 4px 12px; }
+.verdict-text { margin: 14px 0 0; font-size: 14px; background: var(--soft); border-radius: 12px; padding: 10px 14px; }
+.about summary { font-weight: 800; cursor: pointer; min-height: 44px; display: flex; align-items: center; }
+.about ul { padding-left: 1.2em; margin: 8px 0 0; font-size: 14px; }
+.qstats .delta { color: var(--ink); }

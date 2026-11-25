@@ -215,12 +215,13 @@ function Highlight({ model, text }: { model: Model; text: string }) {
     starts.add(at)
     at += p.length
   }
-  let offset = 0
+  // 各かたまりが文章の何文字目から始まるか（描画の前に計算しておく）
+  const pieces = splitPieces(text)
+  const startOf = pieces.map((_, i) => pieces.slice(0, i).reduce((n, x) => n + x.length, 0))
   return (
     <div className="why">
-      {splitPieces(text).map((piece, i) => {
-        const breakBefore = offset > 0 && starts.has(offset)
-        offset += piece.length
+      {pieces.map((piece, i) => {
+        const breakBefore = startOf[i] > 0 && starts.has(startOf[i])
         const w = weightOf(model, piece.toLowerCase())
         const alpha = Math.min(0.9, 0.25 + Math.abs(w) / 2.2)
         const bg = w > 0 ? `rgba(43,181,160,${alpha})` : `rgba(255,107,129,${alpha})`
