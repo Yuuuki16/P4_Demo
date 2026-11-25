@@ -219,3 +219,5 @@ select {
   h2 { font-size: 24px; }
 }
 .builder .small-button { margin-top: 14px; min-height: 44px; padding: 8px 16px; font-size: 15px; }
+.consent p { margin: 0 0 12px; line-height: 1.9; font-size: 15px; }
+.consent p:last-child { margin-bottom: 0; }

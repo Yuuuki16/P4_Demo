@@ -42,3 +42,14 @@ export function hasAnswered(): boolean {
 export function markAnswered() {
   write(ANSWERED_KEY, '1')
 }
+
+const CONSENT_KEY = 'blackbox.consented'
+
+/** このブラウザで、アンケート前の説明に同意済みか（同意の画面は1回だけ出す） */
+export function hasConsented(): boolean {
+  return read(CONSENT_KEY) === '1'
+}
+
+export function markConsented() {
+  write(CONSENT_KEY, '1')
+}
