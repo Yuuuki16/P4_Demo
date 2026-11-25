@@ -68,11 +68,11 @@ export function TestStep({ model, trainedOn, onRetrainBalanced, onNext }: Props)
           <div className="legend">
             <span>
               <i className="sky" />
-              採用の方向に押す
+              採用の方向に加点する
             </span>
             <span>
               <i className="rose" />
-              不採用の方向に押す
+              不採用の方向に加点する
             </span>
           </div>
           <div className="bubble pop">
