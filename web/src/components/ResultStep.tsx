@@ -1,6 +1,5 @@
 import { QUESTIONS } from '../data/questions'
 import type { Answers } from '../lib/types'
-import { HowItWorks } from './HowItWorks'
 import { jp } from '../lib/jp'
 
 type SaveState = 'idle' | 'saving' | 'saved' | 'error'
@@ -32,7 +31,6 @@ export function ResultStep({ pre, post, save, onReplay }: Props) {
         {save === 'saved' && '回答を匿名で保存しました。ご協力ありがとうございました。'}
         {save === 'error' && '回答を保存できませんでした。通信状況を確認してください。'}
       </p>
-      <HowItWorks />
       {save !== 'saving' && (
         <div className="cta">
           <a className="go block" href="#stats">

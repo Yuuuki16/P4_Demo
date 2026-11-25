@@ -13,7 +13,8 @@ import { HowItWorks } from './components/HowItWorks'
 import type { Answers, DatasetId, Model, Resume } from './lib/types'
 import { jp } from './lib/jp'
 
-const STEPS = ['はじめに', 'AIを育てる', '中をのぞく', 'ふりかえり'] as const
+// AIの判断のしくみの解説（しくみ）は、体験後のアンケート（ふりかえり）の前に読んでもらう
+const STEPS = ['はじめに', '育てる', 'のぞく', 'しくみ', 'ふりかえり'] as const
 
 export default function App() {
   const [hash, setHash] = useState(location.hash)
@@ -68,7 +69,8 @@ function Experience() {
   const [consented, setConsented] = useState(hasConsented)
   const surveyDone = answeredBefore || replaying
 
-  const reachable = [true, surveyDone || isComplete(pre), model !== null, model !== null]
+  // 回答済み（surveyDone）のときは、体験後のアンケート（ふりかえり）には進まない
+  const reachable = [true, surveyDone || isComplete(pre), model !== null, model !== null, !surveyDone && model !== null]
 
   // もう一度AIで遊ぶ：アンケートの回答はそのままに、学習からやり直す
   const replay = () => {
@@ -276,21 +278,29 @@ function Experience() {
         />
       )}
 
-      {step === 3 && surveyDone && (
+      {step === 3 && (
         <section>
           <HowItWorks />
           <div className="cta">
-            <button className="go block" type="button" onClick={replay}>
-              もう一度AIを育てる 🔁
-            </button>
-            <a className="ghost block" href="#stats">
-              みんなの回答を見る 📊
-            </a>
+            {surveyDone ? (
+              <>
+                <button className="go block" type="button" onClick={replay}>
+                  もう一度AIを育てる 🔁
+                </button>
+                <a className="ghost block" href="#stats">
+                  みんなの回答を見る 📊
+                </a>
+              </>
+            ) : (
+              <button className="go block" type="button" onClick={() => go(4)}>
+                最後のアンケートに進む →
+              </button>
+            )}
           </div>
         </section>
       )}
 
-      {step === 3 && !surveyDone && (
+      {step === 4 && !surveyDone && (
         <section>
           <div className="hero">
             <div className="icon" aria-hidden="true">💭</div>
