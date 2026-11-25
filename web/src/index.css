@@ -218,3 +218,4 @@ select {
   .wrap { padding-top: 8px; }
   h2 { font-size: 24px; }
 }
+.builder .small-button { margin-top: 14px; min-height: 44px; padding: 8px 16px; font-size: 15px; }
