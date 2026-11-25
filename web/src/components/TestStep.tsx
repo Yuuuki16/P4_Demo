@@ -1,5 +1,5 @@
 import { Fragment, useState } from 'react'
-import { TEST_RESUMES } from '../data/datasets'
+import { DEFAULT_PICKS, GENDERS, PARTS, buildResume, type Picks } from '../data/testResume'
 import { judge } from '../lib/classifier'
 import { isWord, splitPieces } from '../lib/text'
 import type { DatasetId, Model } from '../lib/types'
@@ -13,7 +13,8 @@ type Props = {
 }
 
 export function TestStep({ model, trainedOn, onRetrainBalanced, onNext }: Props) {
-  const [texts, setTexts] = useState<string[]>([...TEST_RESUMES])
+  const [picks, setPicks] = useState<Picks>(DEFAULT_PICKS)
+  const texts = GENDERS.map((g) => buildResume(g, picks))
   const [judged, setJudged] = useState(false)
   const [open, setOpen] = useState(false)
   // 「男子」と「女子」の重みの差で、性別による偏りを学んだかどうかを見る
@@ -26,24 +27,38 @@ export function TestStep({ model, trainedOn, onRetrainBalanced, onNext }: Props)
     <section>
       <div className="hero">
         <h2>AIに判定させて、中をのぞこう</h2>
-        <p className="lead">この2枚の履歴書は、性別を表す<b>1語だけ</b>が違います。文章は自由に書き換えてかまいません。</p>
+        <p className="lead">
+          この2枚の履歴書は、性別を表す<b>1語だけ</b>が違います。下の選択肢から言葉を選んで、履歴書を組み立ててみましょう。
+        </p>
       </div>
 
       <BlackBox open={open} />
 
+      <div className="card builder">
+        <p className="card-label">🧩 履歴書を組み立てる</p>
+        {PARTS.map((part) => (
+          <label className="pick" key={part.key}>
+            <span>{part.label}</span>
+            <select
+              value={picks[part.key]}
+              onChange={(e) => setPicks((p) => ({ ...p, [part.key]: e.target.value }))}
+            >
+              {part.options.map((o) => (
+                <option key={o} value={o}>
+                  {o}
+                </option>
+              ))}
+            </select>
+          </label>
+        ))}
+      </div>
+
       <div className="test">
         {texts.map((text, i) => (
-          <div className="card" key={i}>
-            <label className="card-label" htmlFor={`resume-${i}`}>
-              📄 履歴書{'AB'[i]}
-            </label>
-            <textarea
-              id={`resume-${i}`}
-              value={text}
-              onChange={(e) => setTexts((t) => t.map((v, j) => (j === i ? e.target.value : v)))}
-            />
+          <div className="card" key={GENDERS[i]}>
+            <p className="card-label">📄 履歴書{'AB'[i]}</p>
+            {judged && open ? <Highlight model={model} text={text} /> : <p className="resume">{text}</p>}
             {judged && <Verdict p={judge(model, text)} />}
-            {judged && open && <Highlight model={model} text={text} />}
           </div>
         ))}
       </div>

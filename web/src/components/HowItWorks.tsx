@@ -1,4 +1,5 @@
-import { DATASETS, TEST_RESUMES } from '../data/datasets'
+import { DATASETS } from '../data/datasets'
+import { TEST_RESUMES } from '../data/testResume'
 import { judge, tokenize, train } from '../lib/classifier'
 import type { PresetId } from '../lib/types'
 import { jp } from '../lib/jp'

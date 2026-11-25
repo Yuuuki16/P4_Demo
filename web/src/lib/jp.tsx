@@ -49,7 +49,7 @@ export function phrases(text: string): string[] {
 }
 
 // 中の文字を加工しない要素
-const SKIP = new Set(['textarea', 'svg', 'script', 'style'])
+const SKIP = new Set(['textarea', 'select', 'option', 'svg', 'script', 'style'])
 // ボタンとリンクも基本は加工しない。iPhone の Safari が <wbr> を読み上げ用の名前の中で空白として扱い、
 // VoiceOver で「2枚とも 判定する」のように変な間が空くため。ボタンの文字は短く1行に収まる。
 // 長い説明の入ったボタン（データを選ぶカードなど）だけ、data-jp を付けて加工の対象にする。
