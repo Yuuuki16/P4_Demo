@@ -102,14 +102,20 @@ cd server && TEST_DATABASE_URL=postgres://localhost:5432/blackbox_test go test .
 
 ## 公開するとき
 
-一番簡単なのは、Goサーバー1つでフロントもAPIも配信する方法です。
+回答は PostgreSQL に保存し、Goサーバー1つでフロントもAPIも配信します。サーバーが再起動しても回答は消えません。
+
+1. **Postgres を用意する**：Neon・Supabase・Render Postgres などで DB を作り、接続URL（`postgres://...`）を控える。テーブルはサーバーの初回起動時に自動で作られる
+2. **サーバーを置く**：リポジトリ直下の `Dockerfile` を使えるサービス（Render・Fly.io・Railway など）にデプロイし、環境変数 `DATABASE_URL` に1の接続URLを設定する
+3. **確認する**：公開URLの `/api/health` が `{"status":"ok"}` を返し、アンケートに答えたあと `/#stats` の回答数が増えればOK
+
+接続URLはパスワードを含む秘密情報です。Git にコミットせず、サービスの環境変数（Secret）に入れてください。多くのサービスでは末尾に `?sslmode=require` が必要です。
+
+手元で本番と同じ形を試すとき：
 
 ```bash
-cd web && npm run build
-cd ../server && STATIC_DIR=../web/dist go run .
+docker build -t blackbox .
+docker run --rm -p 8080:8080 -e DATABASE_URL=postgres://... blackbox
 ```
-
-Render や Fly.io などGoを動かせるサービスにそのまま置けます。ただし再起動でファイルが消えるサービスでは、`DATABASE_URL` を設定して回答を PostgreSQL に保存してください。
 
 フロントを Vercel などに別で置く場合は、フロントのビルド時に `VITE_API_URL`（GoサーバーのURL）を、Goサーバーに `ALLOWED_ORIGIN`（フロントのURL）を設定します。
 
@@ -118,7 +124,7 @@ Render や Fly.io などGoを動かせるサービスにそのまま置けます
 | `PORT` | `8080` | 待ち受けポート |
 | `DATABASE_URL` | なし | 指定すると回答を PostgreSQL に保存 |
 | `DATA_FILE` | `responses.jsonl` | `DATABASE_URL` がないときの保存先ファイル |
-| `STATIC_DIR` | なし | 指定するとビルド済みフロントも配信 |
+| `STATIC_DIR` | なし（Docker では `/static`） | 指定するとビルド済みフロントも配信 |
 | `ALLOWED_ORIGIN` | なし | 別ドメインのフロントからのアクセスを許可 |
 
 ## 注意
