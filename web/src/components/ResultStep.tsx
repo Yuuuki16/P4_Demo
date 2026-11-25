@@ -1,18 +1,19 @@
 import { QUESTIONS } from '../data/questions'
 import type { Answers } from '../lib/types'
 import { HowItWorks } from './HowItWorks'
+import { jp } from '../lib/jp'
 
 type SaveState = 'idle' | 'saving' | 'saved' | 'error'
 
 type Props = { pre: Answers; post: Answers; save: SaveState; onReplay: () => void }
 
 export function ResultStep({ pre, post, save, onReplay }: Props) {
-  return (
+  return jp(
     <div className="res pop">
       <div className="hero">
         <div className="icon" aria-hidden="true">🎊</div>
-        <h2>おつかれさまでした！</h2>
-        <p className="lead">体験の前と後で、気持ちはこう変わりました。</p>
+        <h2>おつかれさまでした</h2>
+        <p className="lead">体験の前と後で、気持ちはこのように変わりました。</p>
       </div>
       {QUESTIONS.map((q) => {
         const d = post[q.id] - pre[q.id]
@@ -29,7 +30,7 @@ export function ResultStep({ pre, post, save, onReplay }: Props) {
       <p className="small">
         {save === 'saving' && '回答を保存しています…'}
         {save === 'saved' && '回答を匿名で保存しました。ご協力ありがとうございました。'}
-        {save === 'error' && '回答を保存できませんでした（サーバーに接続できません）。'}
+        {save === 'error' && '回答を保存できませんでした。通信状況を確認してください。'}
       </p>
       <HowItWorks />
       {save !== 'saving' && (
@@ -38,7 +39,7 @@ export function ResultStep({ pre, post, save, onReplay }: Props) {
             みんなの回答を見る 📊
           </a>
           <button className="ghost block" type="button" onClick={onReplay}>
-            もう一度AIで遊ぶ 🔁
+            もう一度AIを育てる 🔁
           </button>
         </div>
       )}

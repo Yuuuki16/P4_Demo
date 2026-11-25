@@ -28,7 +28,12 @@ body {
   font: 16px/1.75 'M PLUS Rounded 1c', 'Hiragino Maru Gothic ProN', system-ui, sans-serif;
   overflow-x: clip;
   -webkit-tap-highlight-color: transparent;
+  /* 日本語を単語の途中で改行しない。改行してよい位置には src/lib/jp.tsx が <wbr> を入れる */
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+  line-break: strict;
 }
+p, li { text-wrap: pretty; }
 a { color: var(--accent); font-weight: 700; }
 button { font-family: inherit; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
 
@@ -163,7 +168,8 @@ select {
   border: 2px solid var(--line); border-radius: 14px; padding: 10px 12px;
   font-size: 16px; font-family: inherit;
 }
-.resume { margin: 0; background: var(--soft); border-radius: 14px; padding: 10px 12px; line-height: 1.8; }
+/* 判定画面の履歴書。学習画面の履歴書一覧（.resumes の中の .resume）には効かせない */
+.card > .resume { margin: 0; background: var(--soft); border-radius: 14px; padding: 10px 12px; line-height: 1.8; }
 .card-label { font-weight: 800; font-size: 14px; display: block; margin-bottom: 6px; }
 .verdict { display: flex; justify-content: space-between; align-items: baseline; margin: 12px 0 6px; gap: 8px; }
 .verdict strong { font-size: 22px; }

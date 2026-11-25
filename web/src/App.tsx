@@ -10,6 +10,7 @@ import { train } from './lib/classifier'
 import { hasAnswered, markAnswered, respondentId } from './lib/respondent'
 import { HowItWorks } from './components/HowItWorks'
 import type { Answers, DatasetId, Model, Resume } from './lib/types'
+import { jp } from './lib/jp'
 
 const STEPS = ['はじめに', 'AIを育てる', '中をのぞく', 'ふりかえり'] as const
 
@@ -21,7 +22,7 @@ export default function App() {
     return () => removeEventListener('hashchange', onHash)
   }, [])
 
-  return (
+  return jp(
     <div className="wrap">
       {hash === '#stats' ? (
         <>
@@ -40,7 +41,7 @@ export default function App() {
         <Experience />
       )}
       <p className="small footer">
-        英語の授業プロジェクト用のアプリです。履歴書は架空のサンプルデータで、AIはブラウザの中で動く、単語を数えるだけの小さなモデルです。
+        英語の授業のプロジェクトとして作ったアプリです。履歴書はすべて架空のもので、AIはブラウザの中だけで動く、単語を数えるだけの小さなモデルです。
       </p>
     </div>
   )
@@ -98,7 +99,7 @@ function Experience() {
     if (hired === 0 || hired === resumes.length) {
       setModel(null)
       setTrainedOn(null)
-      setTrainError('採用と不採用を、少なくとも1件ずつ選んでください（どちらかしかないと、AIは比べて学ぶことができません）。')
+      setTrainError('採用と不採用を1件以上ずつ選んでください。どちらか一方しかないと、AIは違いを学べません。')
       return
     }
     try {
@@ -124,7 +125,7 @@ function Experience() {
     }
   }
 
-  return (
+  return jp(
     <>
       <header className="appbar">
         <h1>
@@ -152,17 +153,17 @@ function Experience() {
           <div className="hero">
             <div className="icon" aria-hidden="true">🙌</div>
             <h2>アンケートは回答済みです</h2>
-            <p className="lead">ご協力ありがとうございました！ アンケートは1人1回ですが、AIのデモは何回でも遊べます。</p>
+            <p className="lead">ご協力ありがとうございました。アンケートは1人1回までですが、AIのデモは何度でも試せます。</p>
           </div>
           <div className="bubble">
             <p>
               <span className="emoji" aria-hidden="true">💡</span>
-              こんどは別のデータや、「自分で決める」でAIを育ててみよう。
+              今度は別のデータを選んだり、採用と不採用を自分で決めたりして、AIを育ててみましょう。
             </p>
           </div>
           <div className="cta">
             <button className="go block" type="button" onClick={replay}>
-              AIを育てて遊ぶ 🌱
+              AIを育ててみる 🌱
             </button>
             <a className="ghost block" href="#stats">
               みんなの回答を見る 📊
@@ -175,29 +176,29 @@ function Experience() {
         <section>
           <div className="hero">
             <div className="icon" aria-hidden="true">🤖</div>
-            <h2>AIの「頭の中」をのぞいてみよう</h2>
+            <h2>AIの頭の中をのぞいてみよう</h2>
             <p className="lead">
-              AIはどうやって人を判断するようになるの？ まちがいはどこから来るの？ 5分で体験できます。
+              AIはどのように人を判断するようになるのか。その判断の間違いはどこから来るのか。5分ほどで体験できます。
             </p>
           </div>
-          <h3>あなたはどっち？</h3>
+          <h3>はじめに選んでください</h3>
           <div className="sets">
-            <button type="button" className="set" onClick={() => setFirstTime(true)}>
+            <button type="button" data-jp className="set" onClick={() => setFirstTime(true)}>
               <span className="icon" aria-hidden="true">✨</span>
               <span>
                 <b>はじめて体験する</b>
-                <span className="mute">かんたんなアンケート（体験の前と後に3問ずつ）に答えながら、AIを育てて中をのぞきます。</span>
+                <span className="mute">体験の前と後に、3問ずつの短いアンケートに答えてもらいます。</span>
               </span>
             </button>
-            <button type="button" className="set" onClick={replay}>
+            <button type="button" data-jp className="set" onClick={replay}>
               <span className="icon" aria-hidden="true">🎮</span>
               <span>
-                <b>アンケートはもう答えた</b>
-                <span className="mute">別のスマホで答えた人もこちら。アンケートなしで、AIのデモだけを何回でも遊べます。</span>
+                <b>アンケートに回答済み</b>
+                <span className="mute">別のスマホで回答した人もこちらへ。アンケートなしで、AIのデモを何度でも試せます。</span>
               </span>
             </button>
           </div>
-          <p className="small">アンケートの回答は匿名で集計され、授業の発表に使います。1人1回までお願いします。</p>
+          <p className="small">回答は匿名で集計し、授業の発表に使います。回答は1人1回までにしてください。</p>
         </section>
       )}
 
@@ -205,7 +206,7 @@ function Experience() {
         <section>
           <div className="hero">
             <div className="icon" aria-hidden="true">✨</div>
-            <h2>まずは、いまの気持ちを教えてください</h2>
+            <h2>いまの気持ちを教えてください</h2>
           </div>
           <div className="bubble">
             <p>
@@ -215,7 +216,7 @@ function Experience() {
           </div>
           <Survey answers={pre} onChange={(id, v) => setPre((a) => ({ ...a, [id]: v }))} />
           <div className="cta">
-            {!isComplete(pre) && <p className="hint">3つすべてに答えると進めます</p>}
+            {!isComplete(pre) && <p className="hint">3問すべてに答えると次へ進めます</p>}
             <button className="go block" type="button" disabled={!isComplete(pre)} onClick={() => go(1)}>
               はじめる 🚀
             </button>
@@ -265,7 +266,7 @@ function Experience() {
           <HowItWorks />
           <div className="cta">
             <button className="go block" type="button" onClick={replay}>
-              もう一度AIで遊ぶ 🔁
+              もう一度AIを育てる 🔁
             </button>
             <a className="ghost block" href="#stats">
               みんなの回答を見る 📊
@@ -278,8 +279,8 @@ function Experience() {
         <section>
           <div className="hero">
             <div className="icon" aria-hidden="true">💭</div>
-            <h2>いま、AIについてどう感じますか？</h2>
-            <p className="lead">最初と同じ3つの質問です。気持ちは変わったかな？</p>
+            <h2>いま、AIについてどう感じていますか</h2>
+            <p className="lead">最初と同じ3問です。体験の前と比べて、気持ちに変化はあったでしょうか。</p>
           </div>
           <Survey
             answers={post}
@@ -287,7 +288,7 @@ function Experience() {
           />
           {!finished && (
             <div className="cta">
-              {!isComplete(post) && <p className="hint">3つすべてに答えると進めます</p>}
+              {!isComplete(post) && <p className="hint">3問すべてに答えると次へ進めます</p>}
               <button className="go block" type="button" disabled={!isComplete(post)} onClick={handleFinish}>
                 回答して変化を見る ✨
               </button>

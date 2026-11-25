@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { fetchStats, type Stats } from '../api'
 import { QUESTIONS } from '../data/questions'
 import { Bar } from './ResultStep'
+import { jp } from '../lib/jp'
 
 /** #stats で開く集計ページ。発表や論文に使う「前後の平均」を表示する */
 export function StatsPage() {
@@ -12,12 +13,12 @@ export function StatsPage() {
     fetchStats().then(setStats).catch((e: Error) => setError(e.message))
   }, [])
 
-  return (
+  return jp(
     <section>
       <div className="hero">
         <div className="icon" aria-hidden="true">📊</div>
         <h2>みんなの回答</h2>
-        <p className="lead">体験の前と後で、AIへの気持ちはどう変わった？（1〜5の平均）</p>
+        <p className="lead">体験の前と後で、AIへの気持ちがどう変わったかを1〜5の平均で示しています。</p>
       </div>
       {error && <div className="status error">{error}</div>}
       {!stats && !error && <p className="mute">読み込み中…</p>}
