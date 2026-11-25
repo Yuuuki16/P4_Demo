@@ -1,5 +1,6 @@
 import { QUESTIONS } from '../data/questions'
 import type { Answers } from '../lib/types'
+import { HowItWorks } from './HowItWorks'
 
 type SaveState = 'idle' | 'saving' | 'saved' | 'error'
 
@@ -23,6 +24,7 @@ export function ResultStep({ pre, post, save }: { pre: Answers; post: Answers; s
         {save === 'saved' && '回答を匿名で保存しました。ご協力ありがとうございました。'}
         {save === 'error' && '回答を保存できませんでした（サーバーに接続できません）。'}
       </p>
+      <HowItWorks />
       {save !== 'saving' && (
         <p className="row">
           <a className="go" href="#stats">
