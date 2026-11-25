@@ -1,4 +1,4 @@
-import { Fragment, useState } from 'react'
+import { Fragment, useState, type ReactNode } from 'react'
 import { DEFAULT_PICKS, GENDERS, PARTS, buildResume, type Picks } from '../data/testResume'
 import { judge } from '../lib/classifier'
 import { isWord, splitPieces } from '../lib/text'
@@ -14,7 +14,10 @@ type Props = {
 
 export function TestStep({ model, trainedOn, onRetrainBalanced, onNext }: Props) {
   const [picks, setPicks] = useState<Picks>(DEFAULT_PICKS)
-  const texts = GENDERS.map((g) => buildResume(g, picks))
+  // 履歴書Bを別々に組み立てているときだけ値が入る。null なら履歴書Aと同じ内容（性別だけが違う）
+  const [picksB, setPicksB] = useState<Picks | null>(null)
+  const separate = picksB !== null
+  const texts = [buildResume(GENDERS[0], picks), buildResume(GENDERS[1], picksB ?? picks)]
   const [judged, setJudged] = useState(false)
   const [open, setOpen] = useState(false)
   // 「男子」と「女子」の重みの差で、性別による偏りを学んだかどうかを見る
@@ -28,30 +31,38 @@ export function TestStep({ model, trainedOn, onRetrainBalanced, onNext }: Props)
       <div className="hero">
         <h2>AIに判定させて、中をのぞこう</h2>
         <p className="lead">
-          この2枚の履歴書は、性別を表す<b>1語だけ</b>が違います。下の選択肢から言葉を選んで、履歴書を組み立ててみましょう。
+          {separate ? (
+            <>
+              この2枚の履歴書は、性別のほかに<b>経験も</b>違います。どちらが採用されるか予想してから判定してみましょう。
+            </>
+          ) : (
+            <>
+              この2枚の履歴書は、性別を表す<b>1語だけ</b>が違います。下の選択肢から言葉を選んで、履歴書を組み立ててみましょう。
+            </>
+          )}
         </p>
       </div>
 
       <BlackBox open={open} />
 
-      <div className="card builder">
-        <p className="card-label">🧩 履歴書を組み立てる</p>
-        {PARTS.map((part) => (
-          <label className="pick" key={part.key}>
-            <span>{part.label}</span>
-            <select
-              value={picks[part.key]}
-              onChange={(e) => setPicks((p) => ({ ...p, [part.key]: e.target.value }))}
-            >
-              {part.options.map((o) => (
-                <option key={o} value={o}>
-                  {o}
-                </option>
-              ))}
-            </select>
-          </label>
-        ))}
-      </div>
+      <Builder
+        title={separate ? '🧩 履歴書A（男子）を組み立てる' : '🧩 履歴書を組み立てる'}
+        picks={picks}
+        onChange={setPicks}
+      >
+        {!separate && (
+          <button className="ghost block small-button" type="button" onClick={() => setPicksB({ ...picks })}>
+            履歴書Bを別々に組み立てる ✏️
+          </button>
+        )}
+      </Builder>
+      {picksB && (
+        <Builder title="🧩 履歴書B（女子）を組み立てる" picks={picksB} onChange={setPicksB}>
+          <button className="ghost block small-button" type="button" onClick={() => setPicksB(null)}>
+            Aと同じ内容に戻す ↩️
+          </button>
+        </Builder>
+      )}
 
       <div className="test">
         {texts.map((text, i) => (
@@ -100,10 +111,20 @@ export function TestStep({ model, trainedOn, onRetrainBalanced, onNext }: Props)
                 という語が不採用の履歴書に多く含まれていました。AIはその偏りを、そのまま数字として覚えたのです。
                 <b>偏りは、データを通して私たち人間から持ち込まれています。</b>
               </p>
+            ) : separate ? (
+              <p>
+                このデータでは<b>男子</b>と<b>女子</b>
+                の重みが同じです。2枚の点数の差は、性別ではなく経験の違いだけから来ています。
+              </p>
             ) : (
               <p>
                 このデータでは<b>男子</b>と<b>女子</b>
                 の重みが同じになるため、2枚の履歴書は同じ点数になります。データを直したことで、AIの判断も直りました。
+              </p>
+            )}
+            {biased && separate && (
+              <p>
+                今は2枚の経験も違うので、点数の差には性別と経験の両方が効いています。色の付いた単語で、どちらがどれだけ効いているか確かめてみましょう。
               </p>
             )}
             <p>
@@ -134,6 +155,35 @@ export function TestStep({ model, trainedOn, onRetrainBalanced, onNext }: Props)
         </>
       )}
     </section>
+  )
+}
+
+type BuilderProps = {
+  title: string
+  picks: Picks
+  onChange: (next: Picks) => void
+  children?: ReactNode
+}
+
+/** 選択肢から言葉を選んで、履歴書を1枚組み立てるカード */
+function Builder({ title, picks, onChange, children }: BuilderProps) {
+  return (
+    <div className="card builder">
+      <p className="card-label">{title}</p>
+      {PARTS.map((part) => (
+        <label className="pick" key={part.key}>
+          <span>{part.label}</span>
+          <select value={picks[part.key]} onChange={(e) => onChange({ ...picks, [part.key]: e.target.value })}>
+            {part.options.map((o) => (
+              <option key={o} value={o}>
+                {o}
+              </option>
+            ))}
+          </select>
+        </label>
+      ))}
+      {children}
+    </div>
   )
 }
 
