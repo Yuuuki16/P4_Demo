@@ -140,12 +140,12 @@ export function TestStep({ model, trainedOn, onRetrainBalanced, onNext }: Props)
                   偏りのないデータで育て直す ⚖️
                 </button>
                 <button className="ghost block" type="button" onClick={onNext}>
-                  このままふりかえりへ進む
+                  このまましくみの解説へ進む
                 </button>
               </>
             ) : (
               <button className="go block" type="button" onClick={onNext}>
-                ふりかえりへ進む →
+                しくみの解説へ進む →
               </button>
             )}
             <button className="link-button" type="button" onClick={() => setOpen(false)}>
