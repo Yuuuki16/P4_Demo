@@ -1,12 +1,13 @@
 import { describe, expect, it } from 'vitest'
 import { judge, tokenize, train } from './classifier'
-import { DATASETS, TEST_RESUMES } from '../data/datasets'
+import { DATASETS } from '../data/datasets'
+import { TEST_RESUMES } from '../data/testResume'
 
 const [MEN, WOMEN] = TEST_RESUMES
 
 describe('tokenize', () => {
   it('漢字・カタカナ・英字のまとまりを単語にし、ひらがなと記号は捨てる', () => {
-    expect(tokenize(MEN)).toEqual(['男子', 'サッカー', '部', '所属', '学園祭', 'カフェ', '出店', '売上', 'トップ'])
+    expect(tokenize(MEN)).toEqual(['男子', 'バスケットボール', '部', '主将', '務', 'ロゴ', '制作'])
   })
 
   it('同じ単語は1回だけ数える', () => {
